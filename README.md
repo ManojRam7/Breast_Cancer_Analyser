@@ -1,132 +1,70 @@
 # Breast Cancer Predictor
 
-### Predicting Tumor Diagnosis with a Reproducible End-to-End ML Pipeline
+Classifies breast tumour samples as malignant or benign from 30 measurements of cell nuclei (radius,
+texture, concavity and so on) in the Wisconsin Diagnostic Breast Cancer dataset. A scaled logistic
+regression is trained by a reproducible script, and a Streamlit app lets you adjust each measurement
+and see the predicted class and probabilities.
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5.2-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.39.0-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](#-quality-checks)
-[![Status](https://img.shields.io/badge/status-portfolio--ready-0A7E8C)](#)
+**Live app:** https://breastcancerpredictor-app.streamlit.app
 
-This project delivers a professional, portfolio-grade machine learning workflow for classifying breast cancer tumors (malignant vs benign) using the Wisconsin dataset.
+![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5-F7931E?logo=scikitlearn&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.39-FF4B4B?logo=streamlit&logoColor=white)
 
-From model training to UI inference, every step is reproducible, documented, and production-polished for demonstration quality.
+## Results
 
-## Highlights
+Stratified 80/20 split (455 training, 114 test samples), `random_state=42`:
 
-- Reproducible training pipeline with persisted artifacts
-- Clean modular architecture under src package structure
-- Evaluation-first workflow with saved metrics JSON
-- Interactive Streamlit dashboard for real-time prediction
-- Automated test coverage for training pipeline integrity
-- No cloud lock-in or paid external dependency required
-
-## Project Snapshot
-
-| Category | Details |
+| Metric | Test set |
 |---|---|
-| Problem Type | Binary classification |
-| Domain | Healthcare / Diagnostic ML (educational use) |
-| Dataset | sklearn Wisconsin Breast Cancer |
-| Model | StandardScaler + LogisticRegression |
-| Evaluation | Accuracy, Precision, Recall, F1, ROC AUC |
-| Deployment Style | Local Streamlit inference app |
+| Accuracy | **0.982** |
+| Precision | 0.986 |
+| Recall | 0.986 |
+| F1 | 0.986 |
+| ROC AUC | **0.996** |
 
-## Model Performance
+Precision, recall and F1 are for the benign class (label 1 in scikit-learn's version of the data).
+`scripts/train_model.py` writes these figures to `artifacts/metrics.json` on every run.
 
-Latest run metrics from artifacts/metrics.json:
+## Approach
 
-- Accuracy: 0.9825
-- Precision: 0.9861
-- Recall: 0.9861
-- F1 Score: 0.9861
-- ROC AUC: 0.9957
+- **Data:** 569 samples, 30 numeric features, 212 malignant and 357 benign, loaded with
+  `sklearn.datasets.load_breast_cancer`. `EDA.IPYNB` checks feature ranges and class balance.
+- **Model:** `StandardScaler` + `LogisticRegression` (liblinear) in one pipeline, so scaling is
+  learned only from the training split. A linear model was chosen because it is accurate on this
+  data, fast, and its coefficients are easy to explain.
+- **Evaluation:** stratified hold-out split to keep the class balance, with accuracy, precision,
+  recall, F1 and ROC AUC.
+- **App:** `Streamlit_app.py` starts every slider at the dataset median, shows the model's test
+  metrics, and trains the model on first launch if no saved model is present.
 
-## Architecture
-
-```mermaid
-flowchart LR
-	A[Load Dataset] --> B[Train/Test Split Stratified]
-	B --> C[Pipeline: StandardScaler + LogisticRegression]
-	C --> D[Evaluate Metrics]
-	D --> E[Save Artifacts: model.joblib + metrics.json]
-	E --> F[Streamlit App]
-	F --> G[Interactive Prediction + Probabilities]
-```
-
-## Repository Structure
-
-```text
-BreastCancer_Predictor/
-├── artifacts/                       # Generated model + metrics
-├── docs/
-│   ├── methodology.md               # Modeling decisions and trade-offs
-│   └── runbook.md                   # Run and troubleshooting guide
-├── scripts/
-│   └── train_model.py               # Training entrypoint
-├── src/
-│   └── breast_cancer_predictor/
-│       ├── config.py                # Paths and train config
-│       ├── data.py                  # Dataset loading
-│       ├── modeling.py              # Pipeline definition
-│       ├── predict.py               # Artifact loading + defaults
-│       └── train.py                 # Train/evaluate/save workflow
-├── tests/
-│   └── test_training_pipeline.py    # Pipeline smoke test
-├── Streamlit_app.py                 # Inference dashboard
-└── requirements.txt
-```
-
-## Quick Start
-
-1. Create a virtual environment and activate it.
+## Run it
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-2. Install dependencies.
-
-```bash
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-3. Train the model and generate artifacts.
-
-```bash
-python scripts/train_model.py
-```
-
-4. Launch the app.
-
-```bash
+python scripts/train_model.py      # trains and saves artifacts/model.joblib and metrics.json
 streamlit run Streamlit_app.py
-```
-
-## Quality Checks
-
-Run automated tests:
-
-```bash
 pytest -q
 ```
 
-## Portfolio Value
+## Project structure
 
-This project demonstrates practical data science engineering skills that recruiters look for:
-
-- Structured project layout (not notebook-only)
-- Reproducible experiments and deterministic config
-- Model evaluation with transparent metric reporting
-- Usable front-end for stakeholder-friendly inference
-- Test-backed reliability and clean documentation
-
-## Documentation
-
-- docs/methodology.md for modeling rationale and evaluation strategy
-- docs/runbook.md for operational steps and troubleshooting
+```text
+EDA.IPYNB                          dataset checks
+src/breast_cancer_predictor/
+    config.py                      paths and training settings
+    data.py                        dataset loading
+    modeling.py                    scikit-learn pipeline
+    train.py                       train, evaluate, save
+    predict.py                     load the saved model; default inputs
+scripts/train_model.py             training entry point
+Streamlit_app.py                   web app
+tests/test_training_pipeline.py    end-to-end training test
+docs/                              methodology and runbook
+```
 
 ## Disclaimer
 
-This is an educational and portfolio project only. It is not a medical device and should not be used for real clinical diagnosis.
+A machine learning exercise on a public benchmark dataset. It is not a medical device and must not
+be used for diagnosis.

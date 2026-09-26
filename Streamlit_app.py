@@ -17,9 +17,10 @@ from breast_cancer_predictor.predict import (  # noqa: E402
     load_artifacts,
 )
 from breast_cancer_predictor.data import load_dataset  # noqa: E402
+from breast_cancer_predictor.train import train_and_evaluate  # noqa: E402
 
 
-st.set_page_config(page_title="Breast Cancer Predictor", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="Breast Cancer Predictor", layout="wide")
 
 st.markdown(
     """
@@ -34,7 +35,7 @@ st.markdown(
 
 st.markdown('<p class="main-title">Breast Cancer Prediction Dashboard</p>', unsafe_allow_html=True)
 st.markdown(
-    '<p class="subtitle">Clinical-style binary classification demo built on the Wisconsin dataset.</p>',
+    '<p class="subtitle">Malignant vs benign classification from 30 cell-nucleus measurements (Wisconsin dataset).</p>',
     unsafe_allow_html=True,
 )
 
@@ -45,12 +46,17 @@ def get_dataset() -> tuple[pd.DataFrame, list[str]]:
     return features.copy(), list(features.columns)
 
 
-try:
-    model, metrics = load_artifacts()
-except ModelArtifactsNotFoundError as exc:
-    st.error(str(exc))
-    st.info("Run: python scripts/train_model.py")
-    st.stop()
+@st.cache_resource
+def get_model() -> tuple[object, dict]:
+    """Load the saved model, training it first if this is a fresh deployment."""
+    try:
+        return load_artifacts()
+    except ModelArtifactsNotFoundError:
+        train_and_evaluate()          # a few seconds: the dataset ships with scikit-learn
+        return load_artifacts()
+
+
+model, metrics = get_model()
 
 features_df, feature_names = get_dataset()
 default_row = default_input_row()
