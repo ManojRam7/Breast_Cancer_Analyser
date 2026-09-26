@@ -1,4 +1,4 @@
-# Breast Cancer Predictor
+# Breast Cancer Analyser
 
 Classifies breast tumour samples as malignant or benign from 30 measurements of cell nuclei (radius,
 texture, concavity and so on) in the Wisconsin Diagnostic Breast Cancer dataset. A scaled logistic

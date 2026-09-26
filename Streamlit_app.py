@@ -20,7 +20,7 @@ from breast_cancer_predictor.data import load_dataset  # noqa: E402
 from breast_cancer_predictor.train import train_and_evaluate  # noqa: E402
 
 
-st.set_page_config(page_title="Breast Cancer Predictor", layout="wide")
+st.set_page_config(page_title="Breast Cancer Analyser", layout="wide")
 
 st.markdown(
     """
@@ -33,7 +33,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<p class="main-title">Breast Cancer Prediction Dashboard</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-title">Breast Cancer Diagnostic Dashboard</p>', unsafe_allow_html=True)
 st.markdown(
     '<p class="subtitle">Malignant vs benign classification from 30 cell-nucleus measurements (Wisconsin dataset).</p>',
     unsafe_allow_html=True,
